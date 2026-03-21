@@ -1,0 +1,68 @@
+CAS3116: Homework 2
+
+Due: 10/16/2025, 11:59pm
+
+Content-Aware Image Resizing (50 points)
+
+All the necessary files (code, images, etc.) mentioned throughout this assignment can be also found on LearnUs HW submission page.
+
+Preparation:
+You will implement one part of the content-aware image resizing technique described in Shai Avidan and Ariel Shamir's influential SIGGRAPH 2007 research paper, "Seam Carving for Content-Aware Image Resizing" available here. If you want to know full details, read through the paper, with emphasis on Section 1 and Section 3.
+See the brief explanation of the algorithm hw2_background.pptx (notes at the bottom each slide). Some examples from a previous class is also provided in hw2_examples.pdf A short walkthrough video based on these slides is also on LearnUs.
+Most functions are provided to you.
+You will be responsible for implementing some missing functions.
+Provided files:
+hw2.m - This script is the main skeleton code which walks you through the entire pipeline. Very small changes are needed to try different images. Feel free to modify the script as needed (e.g., testing, visualization, etc.). For grading, I will be using my own script similar to this.
+M = cumulative_minimum_energy_map(energyImage,seamDirection) - computes minimum cumulative energy. The input energyImage is a 2D matrix output by the energy_image function that you will implement (see below), and the input seamDirection is either 'HORIZONTAL' or 'VERTICAL'. The output is a 2D matrix of class double.
+verticalSeam = find_optimal_vertical_seam(M) and horizontalSeam = find_optimal_horizontal_seam(M) - compute the optimal vertical and horizontal seams. The input is the 2D matrix output by cumulative_minimum_energy_map, and the output is a vector containing the row indices (or column indices, respectively) of the pixels belonging to a horizontal (or vertical, respectively) seam. For a horizontal seam, you have as many seam points as you have image columns, i.e. one row index for each image column.
+reducedColorImage = reduceHeight(im, display_flag) - reduces the height of your image in a content-aware way. (Use this to implement reduceWidth below)
+Functions you need to implement:
+[10 pts] [energyImage, Ix, Iy] = energy_image(im, Ix_kernel, Iy_kernel) - to compute the energy at each pixel using the magnitude of the x and y gradients.
+In this function, you first need to convert it to grayscale before computing the gradients, using rgb2gray.
+Then, you need to change the type of your grayscale image I to double using double(I) function to get negative values after filtering. If you apply your filter on uint8 image, all < 0 values will become 0 (the minimum uint8 value), which is not what you want.
+Then apply the filter and compute the energy map.
+
+Inputs:
+im should be a nrows-by-ncols-by-3 matrix of class (datatype) uint8, e.g. the output of imread on a color image.
+Ix_kernel and Iy_kernel: kernels for Ix and Iy respectively. These are predefined in hw2.m, but you can try other kernels if you want.
+Outputs:
+Each of the outputs energyImage, Ix, Iy should be 2D matrices of class double, each of size nrows-by-ncols-by-1.
+Ix, Iy are the gradients in the x and y directions, i.e. the dI/dx and dI/dy; use the filters we discussed in class to compute them as provided in the script. You are welcome to use imfilter, but don't use Matlab's imgradient function.
+energyImage is using L2 norm: sqrt((dI/dx)^2+(dI/dy)^2). In other words, for each energyImage[i,j], compute the L2 norm using the dI/dx and dI/dy values at i,j. This possible without loops (you can use loops though).
+
+[15 pts] reducedColorImage = reduceWidth(im, display_flag) - to reduce the width of your image in a content-aware way. The function should call the energy_image, cumulative_minimum_energy_map, and find_optimal_vertical_seam functions. Note: The provided reduceHeight is the "height version" of reduceWidth. Simply start from reduceHeight and change this to reduceWidth.
+
+Inputs:
+The function should take in a nrows-by-ncols-by-3 matrix im of class uint8.
+If the display_flag is set to true, the function should display, in a 1x3 subplot, the following: (a) the energy image, (b) the cumulative energy image, (c) the optimal seam (using displaySeam).
+Outputs:
+The output must be a 3D matrix reducedColorImage, of class uint8, which is the same as the input image but with its width reduced by one pixel.
+
+[10 points] contentAwareResize = generate_results(filename, reduceAmt, reduceWhat) - repeatedly reduce the size by calling appropriate functions and return the reduced image as contentAwareResize. In your function, after reading in the image, you should call reduceWidth or reduceHeight as many times as needed to reduce the width/height by the requested amoun.
+
+Inputs:
+filename is a character array (e.g. 'prague.jpg'),
+reduceAmt is an integer which says by how many pixels to reduce the width/height, and
+reduceWhat is 'WIDTH' or 'HEIGHT'.
+Outputs:
+contentAwareResize containing the content-aware reduced image.
+Tips:
+You can visually assess the results by completing Step 6 of hw2 which produces the (1) the original image, (2) context-aware resize, and (3) standard resize (i.e., imresize).
+Required visual results:
+[10 pts] Include the visual results of running generate_results on the provided prague.jpg and shrinking its height by 50 pixels. Also include the results of shrinking the width of the provided mall.jpg by 50 pixels. For both images, include:
+Figures showing (1) the energy map, (2) the cumulative energy maps, and (3) the first optimal seam saved as prague_energy.png and mall_energy.png. This is done in Step 4 of hw2.
+Figures showing (1) the original image, (2) content-aware resize, and (3) standard resize (i.e., imresize) saved as prague_reduced.png and mall_reduced.png. This is done in Step 6 of hw2.
+Note that the code for saving these figures are already provided in Step 4 and 6 of hw2.m. They automatically save the figures, but you can also manually resize the figure window and save it (File -> Save as).
+
+[5 pts] Try your own image my_image.png using any reduction size or direction. Similar to the above examples, save my_image_energy.png and my_image_reduced.png. Try to use your own image with some reasonable amount of reduction or direction such that content-aware resizing produces a different result when compared to imresize. You can come up with examples where the content-aware resizing fails too. In general, I will not be very picky about the quality of the result.
+Submission: Please submit the following files (do not zip):
+Your hw2.m (will not grade this; this is just for reference)
+energy_image.m
+reduceWidth.m
+generate_results.m
+prague_energy.png and prague_reduced.png
+mall_energy.png and mall_reduced.png
+my_image_energy.png and my_image_reduced.png
+
+Acknowledgement: Adriana Kovashka (University of Pittsburgh) and Kristen Grauman (UT Austin).
+
